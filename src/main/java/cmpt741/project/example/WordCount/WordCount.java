@@ -45,6 +45,9 @@ public class WordCount {
     }
 
     public static void main(String args[]) throws IOException {
+        System.out.println("Getting data from path - " + args[0]);
+        System.out.println("Outputting data to path - " + args[1]);
+
         JobConf conf = new JobConf(WordCount.class);
         conf.setJobName("wordcount");
         conf.setOutputKeyClass(Text.class);
