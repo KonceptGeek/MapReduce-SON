@@ -5,5 +5,6 @@ package cmpt741.project.common;
  */
 public enum Params {
     MINIMUM_SUPPORT,
-    ITEM_SPLIT;
+    ITEM_SPLIT,
+    TOTAL_TRANSACTIONS;
 }
