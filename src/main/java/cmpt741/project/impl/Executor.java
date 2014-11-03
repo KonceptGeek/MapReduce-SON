@@ -2,6 +2,9 @@ package cmpt741.project.impl;
 
 import cmpt741.project.common.HadoopConf;
 import static cmpt741.project.common.Params.*;
+
+import cmpt741.project.common.Utils;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -24,12 +27,16 @@ public class Executor {
         pass1Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), 500);
         pass1Job.getConfiguration().set(ITEM_SPLIT.toString(), "\\s+");
 
+        int totalLineCount = Utils.getLinesInHadoopFile(new Path(args[0]), FileSystem.get(pass1Job.getConfiguration()));
+        pass1Job.getConfiguration().setInt(TOTAL_TRANSACTIONS.toString(), totalLineCount);
+
         System.out.println("INPUT PATH - " + args[0]);
         System.out.println("OUTPUT PATH - " + args[1]);
 
         System.out.println("############# Executing Pass1 Map Reduce #############");
         FileInputFormat.setInputPaths(pass1Job, new Path(args[0]));
         FileOutputFormat.setOutputPath(pass1Job, new Path(args[1]));
+
 
         System.exit(pass1Job.waitForCompletion(true) ? 0 : 1);
     }
