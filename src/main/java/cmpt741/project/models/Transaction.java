@@ -1,6 +1,7 @@
 package cmpt741.project.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,5 +32,10 @@ public class Transaction {
 
     public int getTransactionId() {
         return this.transactionId;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionID: " + String.valueOf(transactionId) + ", Items: " + Arrays.toString(items.toArray());
     }
 }
