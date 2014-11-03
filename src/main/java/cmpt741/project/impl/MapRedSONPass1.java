@@ -27,6 +27,12 @@ public class MapRedSONPass1 {
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
             String splitRegex = context.getConfiguration().get(ITEM_SPLIT.toString());
+            int totalTransactions = context.getConfiguration().getInt(TOTAL_TRANSACTIONS.toString(), 0);
+            if (totalTransactions == 0) {
+                System.exit(1);
+            }
+            System.out.println("Total Transactions - " + String.valueOf(totalTransactions));
+
             if (splitRegex == null) {
                 splitRegex = "\\s+";
                 System.err.println("Split regex not found");
@@ -40,7 +46,6 @@ public class MapRedSONPass1 {
             }
 
             List<Transaction> transactions = Utils.readTransactionsFromHadoop(path, splitRegex, fileSystem);
-
             System.out.println("Number of transactions: " + String.valueOf(transactions.size()));
         }
 
