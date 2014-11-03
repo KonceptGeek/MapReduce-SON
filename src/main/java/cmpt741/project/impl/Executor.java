@@ -1,7 +1,7 @@
 package cmpt741.project.impl;
 
 import cmpt741.project.common.HadoopConf;
-import cmpt741.project.common.Params;
+import static cmpt741.project.common.Params.*;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -21,7 +21,8 @@ public class Executor {
                 MapRedSONPass1.Pass1Reduce.class, "jsabharw-MapRedSONPass1",
                 Text.class, IntWritable.class);
         pass1Job.setNumReduceTasks(10);
-        pass1Job.getConfiguration().setInt(Params.MINIMUM_SUPPORT.toString(), 100);
+        pass1Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), 500);
+        pass1Job.getConfiguration().set(ITEM_SPLIT.toString(), "\\s+");
 
         System.out.println("INPUT PATH - " + args[0]);
         System.out.println("OUTPUT PATH - " + args[1]);
