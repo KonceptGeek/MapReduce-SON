@@ -50,4 +50,14 @@ public class Utils {
         }
         return transaction;
     }
+
+    public static int getLinesInHadoopFile(Path path, FileSystem fileSystem) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(path)));
+        String line;
+        int lineCount = 0;
+        while((line = bufferedReader.readLine()) != null) {
+            lineCount++;
+        }
+        return lineCount;
+    }
 }
