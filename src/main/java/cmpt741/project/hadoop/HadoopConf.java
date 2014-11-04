@@ -1,4 +1,4 @@
-package cmpt741.project.common;
+package cmpt741.project.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -12,7 +12,8 @@ public class HadoopConf {
 
     public static Job generateConf(Class mainClass, Class mapperClass, Class reducerClass,
                                        String jobName, Class outputKeyClass,
-                                       Class outputValueClass) throws IOException{
+                                       Class outputValueClass, Class inputFormatClass
+                                       ) throws IOException{
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, jobName);
 
@@ -22,6 +23,8 @@ public class HadoopConf {
         job.setReducerClass(reducerClass);
         job.setOutputKeyClass(outputKeyClass);
         job.setOutputValueClass(outputValueClass);
+        job.setInputFormatClass(inputFormatClass);
+
 
         return job;
     }
