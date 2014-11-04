@@ -64,7 +64,7 @@ def generateFrequentSet(candidateSetFrequency, minSupport):
 
 if __name__ == '__main__':
     dataFile = os.path.relpath('../resources/test1.txt')
-    minSupport = 2
+    minSupport = 10
     frequentItemSets = {}
     transactionList = []
     frequentSet = set()
@@ -90,7 +90,10 @@ if __name__ == '__main__':
             frequentSet = set(frequentSet.keys())
         itemGroupSize += 1
 
-    print frequentItemSets
+
+    for key, value in frequentItemSets.iteritems():
+        for k, v in value.iteritems():
+            print k
 
 
 
