@@ -1,20 +1,20 @@
 package cmpt741.project.impl;
 
-import cmpt741.project.common.Utils;
-import cmpt741.project.models.Transaction;
 import static cmpt741.project.common.Params.*;
+
+import cmpt741.project.apriori.Apriori;
+import cmpt741.project.apriori.Database;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.*;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+
 
 /**
  * @author Jasneet Sabharwal (jasneet.sabharwal@sfu.com)
@@ -24,7 +24,7 @@ public class MapRedSONPass1 {
     public static class Pass1Map extends Mapper<LongWritable, Text,
             Text, IntWritable> {
 
-        @Override
+        /*@Override
         public void setup(Context context) throws IOException, InterruptedException {
             String splitRegex = context.getConfiguration().get(ITEM_SPLIT.toString());
             int totalTransactions = context.getConfiguration().getInt(TOTAL_TRANSACTIONS.toString(), 0);
@@ -47,15 +47,44 @@ public class MapRedSONPass1 {
 
             List<Transaction> transactions = Utils.readTransactionsFromHadoop(path, splitRegex, fileSystem);
             System.out.println("Number of transactions: " + String.valueOf(transactions.size()));
-        }
+        }*/
 
         public void map(LongWritable key, Text value,
                         Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
-            int numMappers = Integer.parseInt(conf.get("mapred.map.tasks"));
+            //int numMappers = Integer.parseInt(conf.get("mapred.map.tasks"));
+            int minSupport = conf.getInt(MINIMUM_SUPPORT.toString(), 0);
+            int totalTransactions = conf.getInt(TOTAL_TRANSACTIONS.toString(), 0);
 
+            if (minSupport == 0 || totalTransactions == 0) {
+                throw new InterruptedException("Support or Total Transactions is 0");
+            }
 
-            context.write(value, new IntWritable(1));
+            Database db = new Database(value.toString());
+            int numTransactions = db.dbSize();
+
+            int supportForMap = (int) Math.ceil((((double) numTransactions)/((double) totalTransactions)) * minSupport);
+
+            System.out.print("\nSupport for map: " + String.valueOf(supportForMap));
+
+            System.out.println("\nStarting Apriori");
+            Apriori apriori = new Apriori("Map1-Apriori", db, supportForMap);
+            Apriori.debugger = true;
+            apriori.start();
+            try {
+                apriori.join();
+                apriori.printPatterns();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            List<List<Integer>> frequentItemsets = apriori.getFrequentItemsets();
+            for (List<Integer> itemset : frequentItemsets) {
+                String output = "";
+                for (Integer item : itemset) {
+                    output += String.valueOf(item) + " ";
+                }
+                context.write(new Text(output.trim()), new IntWritable(1));
+            }
         }
     }
 
