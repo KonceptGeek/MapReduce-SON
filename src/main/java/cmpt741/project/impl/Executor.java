@@ -1,6 +1,7 @@
 package cmpt741.project.impl;
 
-import cmpt741.project.common.HadoopConf;
+import cmpt741.project.hadoop.CustomFileInputFormat;
+import cmpt741.project.hadoop.HadoopConf;
 import static cmpt741.project.common.Params.*;
 
 import cmpt741.project.common.Utils;
@@ -22,9 +23,9 @@ public class Executor {
         //Create job conf for Pass1
         Job pass1Job = HadoopConf.generateConf(MapRedSONPass1.class, MapRedSONPass1.Pass1Map.class,
                 MapRedSONPass1.Pass1Reduce.class, "jsabharw-MapRedSONPass1",
-                Text.class, IntWritable.class);
-        pass1Job.setNumReduceTasks(10);
-        pass1Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), 500);
+                Text.class, IntWritable.class, CustomFileInputFormat.class);
+        //pass1Job.setNumReduceTasks(10);
+        pass1Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), 10);
         pass1Job.getConfiguration().set(ITEM_SPLIT.toString(), "\\s+");
 
         int totalLineCount = Utils.getLinesInHadoopFile(new Path(args[0]), FileSystem.get(pass1Job.getConfiguration()));
@@ -36,7 +37,6 @@ public class Executor {
         System.out.println("############# Executing Pass1 Map Reduce #############");
         FileInputFormat.setInputPaths(pass1Job, new Path(args[0]));
         FileOutputFormat.setOutputPath(pass1Job, new Path(args[1]));
-
 
         System.exit(pass1Job.waitForCompletion(true) ? 0 : 1);
     }
