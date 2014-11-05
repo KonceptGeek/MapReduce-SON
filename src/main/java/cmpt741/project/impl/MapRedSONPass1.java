@@ -7,6 +7,7 @@ import cmpt741.project.apriori.Database;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -65,7 +66,8 @@ public class MapRedSONPass1 {
 
             int supportForMap = (int) Math.ceil((((double) numTransactions)/((double) totalTransactions)) * minSupport);
 
-            System.out.print("\nSupport for map: " + String.valueOf(supportForMap));
+            System.out.println("\nSupport for map: " + String.valueOf(supportForMap));
+            System.out.println("\nTransactions being processed by map: " + String.valueOf(numTransactions));
 
             System.out.println("\nStarting Apriori");
             Apriori apriori = new Apriori("Map1-Apriori", db, supportForMap);
@@ -89,11 +91,11 @@ public class MapRedSONPass1 {
     }
 
     public static class Pass1Reduce extends Reducer<Text, IntWritable,
-            Text, IntWritable> {
+            Text, NullWritable> {
 
-        public void reduce(Text text, Iterator<IntWritable> values,
+        public void reduce(Text text, Iterable<IntWritable> values,
                            Context context) throws IOException, InterruptedException {
-            context.write(text, new IntWritable(1));
+            context.write(new Text(text.toString()), NullWritable.get());
         }
     }
 }
