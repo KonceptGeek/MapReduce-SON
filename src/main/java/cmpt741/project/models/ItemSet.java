@@ -55,6 +55,11 @@ public class ItemSet implements Comparable<ItemSet>{
 
     @Override
     public String toString() {
-        return "ItemSet: " + Arrays.toString(items.toArray()) + "\nSupport: " + String.valueOf(support);
+        String result = "";
+        for (Item item : items) {
+            result += item.getItemName();
+            result = result + " ";
+        }
+        return result.trim();
     }
 }
