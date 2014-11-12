@@ -27,7 +27,7 @@ import com.google.common.collect.Sets;
 public class MapRedSONPass2 {
 
     public static class Pass2Map extends Mapper<LongWritable, Text, Text, IntWritable> {
-        private static Map<ItemSet, Integer> itemsets = new HashMap<>();
+        private static Map<String, Integer> itemsets = new HashMap<>();
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
@@ -65,14 +65,15 @@ public class MapRedSONPass2 {
                 while(iterator.hasNext()) {
                     Set next = (Set) iterator.next();
                     ItemSet itemSet = Utils.getItemset(next);
-                    if (itemsets.containsKey(itemSet)) {
-                        int count = itemsets.get(itemSet);
-                        itemsets.put(itemSet, count+1);
+                    if (itemsets.containsKey(itemSet.toString())) {
+                        int count = itemsets.get(itemSet.toString());
+                        itemsets.put(itemSet.toString(), count+1);
                     }
                 }
             }
 
-            for (Map.Entry<ItemSet, Integer> entrySet : itemsets.entrySet()) {
+            for (Map.Entry<String, Integer> entrySet : itemsets.entrySet()) {
+                System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
                 context.write(new Text(entrySet.getKey().toString()), new IntWritable(entrySet.getValue().intValue()));
             }
         }
@@ -84,22 +85,29 @@ public class MapRedSONPass2 {
             String line = null;
             while((line = bufferedReader.readLine()) != null) {
                 ItemSet itemSet = Utils.getItemset(line);
-                itemsets.put(itemSet, 0);
+                itemsets.put(itemSet.toString(), 0);
             }
 
             bufferedReader.close();
         }
 
-        private static List<ItemSet> getItemSetSubsets(ItemSet itemset) {
-            return null;
-        }
     }
 
     public static class Pass2Red extends Reducer<Text, IntWritable, Text, IntWritable> {
 
         public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-            System.out.println("Pass2Reduce");
-            context.write(key, new IntWritable(1));
+            int minSupport = context.getConfiguration().getInt(MINIMUM_SUPPORT.toString(), 0);
+            System.out.println("MINIMUM SUPPORT: " + String.valueOf(minSupport));
+            int support = 0;
+            for (IntWritable value : values) {
+                support += value.get();
+            }
+            if (support >= minSupport) {
+                System.out.println("WRITING - " + key.toString() + "; Support - " + String.valueOf(support));
+                context.write(key, new IntWritable(support));
+            } else {
+                System.out.println("LEAVING - " + key.toString() + "; Support - " + String.valueOf(support));
+            }
         }
     }
 }

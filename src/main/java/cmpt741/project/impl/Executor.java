@@ -87,7 +87,7 @@ public class Executor {
         pass2Job.getConfiguration().set(PASS1_OP.toString(), pass1OpPath);
         pass2Job.getConfiguration().set(ITEM_SPLIT.toString(), "\\s+");
         pass2Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), minSupport);
-        pass2Job.getConfiguration().setLong("mapreduce.task.timeout", 1000000);
+            pass2Job.getConfiguration().setLong("mapreduce.task.timeout", 3000000);
 
         FileInputFormat.setInputPaths(pass2Job, new Path(inputPath));
         FileOutputFormat.setOutputPath(pass2Job, new Path(outputPath));
