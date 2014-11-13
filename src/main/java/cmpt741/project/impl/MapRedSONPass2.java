@@ -3,7 +3,6 @@ package cmpt741.project.impl;
 import static cmpt741.project.common.Params.*;
 
 import cmpt741.project.common.Utils;
-import cmpt741.project.models.ItemSet;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
@@ -27,7 +26,7 @@ import com.google.common.collect.Sets;
 public class MapRedSONPass2 {
 
     public static class Pass2Map extends Mapper<LongWritable, Text, Text, IntWritable> {
-        private static Map<String, Integer> itemsets = new HashMap<>();
+        private static Map<List<Integer>, Integer> itemsets = new HashMap<>();
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
@@ -56,25 +55,26 @@ public class MapRedSONPass2 {
             System.out.println("Pass2Map");
             String[] lines = value.toString().split("\\n");
             for (String line : lines) {
-                String[] lineSplit = line.split("\\s+");
+                //String[] lineSplit = line.split("\\s+");
+                List<Integer> lineSplit = Utils.getIntegerArray(line);
                 Set lineSet = new HashSet();
-                lineSet.addAll(Arrays.asList(lineSplit));
+                lineSet.addAll(lineSplit);
                 Set powerSet = Sets.powerSet(lineSet);
                 System.out.println("POWERSETS of - " + line);
-                Iterator iterator = powerSet.iterator();
-                while(iterator.hasNext()) {
-                    Set next = (Set) iterator.next();
-                    ItemSet itemSet = Utils.getItemset(next);
-                    if (itemsets.containsKey(itemSet.toString())) {
-                        int count = itemsets.get(itemSet.toString());
-                        itemsets.put(itemSet.toString(), count+1);
+
+                for(Object next : powerSet) {
+                    List<Integer> itemSet = Utils.getIntegerArray((Set) next);
+                    if (itemsets.containsKey(itemSet)) {
+                        int count = itemsets.get(itemSet);
+                        itemsets.put(itemSet, count+1);
                     }
                 }
+
             }
 
-            for (Map.Entry<String, Integer> entrySet : itemsets.entrySet()) {
+            for (Map.Entry<List<Integer>, Integer> entrySet : itemsets.entrySet()) {
                 System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
-                context.write(new Text(entrySet.getKey().toString()), new IntWritable(entrySet.getValue().intValue()));
+                context.write(new Text(Utils.intArrayToString(entrySet.getKey())), new IntWritable(entrySet.getValue().intValue()));
             }
         }
 
@@ -84,8 +84,8 @@ public class MapRedSONPass2 {
 
             String line = null;
             while((line = bufferedReader.readLine()) != null) {
-                ItemSet itemSet = Utils.getItemset(line);
-                itemsets.put(itemSet.toString(), 0);
+                List<Integer> itemSet = Utils.getIntegerArray(line);
+                itemsets.put(itemSet, 0);
             }
 
             bufferedReader.close();

@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -80,6 +81,33 @@ public class Utils {
         }
 
         return new ItemSet(items, 0);
+    }
+
+    public static List<Integer> getIntegerArray(Set line) {
+        List<Integer> result = new ArrayList<>();
+        for (Object i : line) {
+            result.add((Integer) i);
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+    public static List<Integer> getIntegerArray(String line) {
+        List<Integer> result = new ArrayList<>();
+        String[] lineSplit = line.split("\\s+");
+        for (String splitVal : lineSplit) {
+            result.add(Integer.valueOf(splitVal.trim()));
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+    public static String intArrayToString(List<Integer> array) {
+        String result = "";
+        for (Integer element : array) {
+            result += String.valueOf(element) + " ";
+        }
+        return result.trim();
     }
 }
 
