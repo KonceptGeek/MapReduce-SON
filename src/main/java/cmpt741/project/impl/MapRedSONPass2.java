@@ -30,12 +30,13 @@ public class MapRedSONPass2 {
 
     public static class Pass2Map extends Mapper<LongWritable, Text, Text, IntWritable> {
         private static Map<List<Integer>, Integer> itemsets = new HashMap<>();
+        private static int largestTransactionSize = 0;
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
             super.setup(context);
             //Read the data of the reduce step of pass1
-            System.out.println("In SETUP");
+            //System.out.println("In SETUP");
             String pass1OpPath = context.getConfiguration().get(PASS1_OP.toString());
             RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator =
                     FileSystem.get(context.getConfiguration()).listFiles(new Path(pass1OpPath), true);
@@ -46,8 +47,8 @@ public class MapRedSONPass2 {
                     readFromFile(path, context);
                 }
             }
-            System.out.println("SETUP DONE");
-            System.out.println(itemsets.size());
+            //System.out.println("SETUP DONE");
+            //System.out.println(itemsets.size());
         }
 
         public void map(LongWritable key, Text value,
@@ -55,19 +56,21 @@ public class MapRedSONPass2 {
             // For each line in the subset
             // create all possible subsetts and check if the subset
             // is present in the data read in setup and update the counts
-            System.out.println("Pass2Map");
-            System.out.println(((FileSplit) context.getInputSplit()).getPath().toString());
+            //System.out.println("Pass2Map");
+            //System.out.println(((FileSplit) context.getInputSplit()).getPath().toString());
             String[] lines = value.toString().split("\\n");
-            int maxK = 0;
-            String maxLine = "";
+            //int maxK = 0;
+            //String maxLine = "";
             for (String line : lines) {
                 List<Integer> lineSplit = Utils.getIntegerArray(line);
                 ICombinatoricsVector<Integer> initialSet = Factory.createVector(lineSplit);
-                if(lineSplit.size() > maxK) {
-                    maxK = lineSplit.size();
-                    maxLine = line;
+
+                int iterationLimit = lineSplit.size();
+                if (lineSplit.size() > largestTransactionSize) {
+                    iterationLimit = largestTransactionSize;
                 }
-                for (int k=1; k <= lineSplit.size(); k++) {
+
+                for (int k=1; k <= iterationLimit; k++) {
                     Generator<Integer> powerSetGen = Factory.createSimpleCombinationGenerator(initialSet, k);
                     for (ICombinatoricsVector<Integer> subset : powerSetGen) {
                         if (subset.getSize() != 0) {
@@ -81,8 +84,8 @@ public class MapRedSONPass2 {
                     }
                 }
             }
-            System.out.println("MaxK - " + String.valueOf(maxK));
-            System.out.println("Line - " + maxLine);
+            //System.out.println("MaxK - " + String.valueOf(maxK));
+            //System.out.println("Line - " + maxLine);
 
             for (Map.Entry<List<Integer>, Integer> entrySet : itemsets.entrySet()) {
                 //System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
@@ -98,6 +101,9 @@ public class MapRedSONPass2 {
             while((line = bufferedReader.readLine()) != null) {
                 List<Integer> itemSet = Utils.getIntegerArray(line);
                 itemsets.put(itemSet, 0);
+                if (itemSet.size() >= largestTransactionSize) {
+                    largestTransactionSize = itemSet.size();
+                }
             }
 
             bufferedReader.close();
@@ -109,17 +115,17 @@ public class MapRedSONPass2 {
 
         public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int minSupport = context.getConfiguration().getInt(MINIMUM_SUPPORT.toString(), 0);
-            System.out.println("MINIMUM SUPPORT: " + String.valueOf(minSupport));
+            //System.out.println("MINIMUM SUPPORT: " + String.valueOf(minSupport));
             int support = 0;
             for (IntWritable value : values) {
                 support += value.get();
             }
             if (support >= minSupport) {
-                System.out.println("WRITING - " + key.toString() + "; Support - " + String.valueOf(support));
+                //System.out.println("WRITING - " + key.toString() + "; Support - " + String.valueOf(support));
                 context.write(key, new IntWritable(support));
-            } else {
+            } /*else {
                 System.out.println("LEAVING - " + key.toString() + "; Support - " + String.valueOf(support));
-            }
+            }*/
         }
     }
 }

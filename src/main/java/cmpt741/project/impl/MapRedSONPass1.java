@@ -65,18 +65,18 @@ public class MapRedSONPass1 {
             Database db = new Database(value.toString());
             int numTransactions = db.dbSize();
 
-            int supportForMap = (int) Math.ceil((((double) numTransactions)/((double) totalTransactions)) * minSupport);
+            int supportForMap = (int) Math.floor((((double) numTransactions)/((double) totalTransactions)) * minSupport);
 
-            System.out.println("\nSupport for map: " + String.valueOf(supportForMap));
-            System.out.println("\nTransactions being processed by map: " + String.valueOf(numTransactions));
+            //System.out.println("\nSupport for map: " + String.valueOf(supportForMap));
+            //System.out.println("\nTransactions being processed by map: " + String.valueOf(numTransactions));
 
-            System.out.println("\nStarting Apriori");
+            //System.out.println("\nStarting Apriori");
             Apriori apriori = new Apriori("Map1-Apriori", db, supportForMap);
-            Apriori.debugger = true;
+            Apriori.debugger = false;
             apriori.start();
             try {
                 apriori.join();
-                apriori.printPatterns();
+                //apriori.printPatterns();
             } catch (Exception e) {
                 e.printStackTrace();
             }
