@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import com.google.common.collect.Sets;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.Generator;
+import org.paukov.combinatorics.ICombinatoricsVector;
 
 /**
  * @author Jasneet Sabharwal (jasneet.sabharwal@sfu.com)
@@ -53,27 +56,36 @@ public class MapRedSONPass2 {
             // create all possible subsetts and check if the subset
             // is present in the data read in setup and update the counts
             System.out.println("Pass2Map");
+            System.out.println(((FileSplit) context.getInputSplit()).getPath().toString());
             String[] lines = value.toString().split("\\n");
+            int maxK = 0;
+            String maxLine = "";
             for (String line : lines) {
-                //String[] lineSplit = line.split("\\s+");
                 List<Integer> lineSplit = Utils.getIntegerArray(line);
-                Set lineSet = new HashSet();
-                lineSet.addAll(lineSplit);
-                Set powerSet = Sets.powerSet(lineSet);
-                System.out.println("POWERSETS of - " + line);
-
-                for(Object next : powerSet) {
-                    List<Integer> itemSet = Utils.getIntegerArray((Set) next);
-                    if (itemsets.containsKey(itemSet)) {
-                        int count = itemsets.get(itemSet);
-                        itemsets.put(itemSet, count+1);
+                ICombinatoricsVector<Integer> initialSet = Factory.createVector(lineSplit);
+                if(lineSplit.size() > maxK) {
+                    maxK = lineSplit.size();
+                    maxLine = line;
+                }
+                for (int k=1; k <= lineSplit.size(); k++) {
+                    Generator<Integer> powerSetGen = Factory.createSimpleCombinationGenerator(initialSet, k);
+                    for (ICombinatoricsVector<Integer> subset : powerSetGen) {
+                        if (subset.getSize() != 0) {
+                            List<Integer> itemSet = subset.getVector();
+                            //Collections.sort(itemSet);
+                            if (itemsets.containsKey(itemSet)) {
+                                int count = itemsets.get(itemSet);
+                                itemsets.put(itemSet, count + 1);
+                            }
+                        }
                     }
                 }
-
             }
+            System.out.println("MaxK - " + String.valueOf(maxK));
+            System.out.println("Line - " + maxLine);
 
             for (Map.Entry<List<Integer>, Integer> entrySet : itemsets.entrySet()) {
-                System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
+                //System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
                 context.write(new Text(Utils.intArrayToString(entrySet.getKey())), new IntWritable(entrySet.getValue().intValue()));
             }
         }

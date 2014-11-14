@@ -48,6 +48,7 @@ public class Executor {
             ClassNotFoundException, InterruptedException {
         System.out.println("SUBMITTING PASS 1");
 
+
         //Create job conf for Pass1
         Job pass1Job = HadoopConf.generateConf(MapRedSONPass1.class,
                 MapRedSONPass1.Pass1Map.class, MapRedSONPass1.Pass1Reduce.class,
@@ -63,6 +64,7 @@ public class Executor {
         pass1Job.getConfiguration().setInt(TOTAL_TRANSACTIONS.toString(), 100000);
 
         pass1Job.getConfiguration().setLong("mapreduce.task.timeout", 1000000);
+
 
 
         System.out.println("INPUT PATH - " + inputPath);

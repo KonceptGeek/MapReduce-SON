@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -82,6 +83,7 @@ public class MapRedSONPass1 {
             List<List<Integer>> frequentItemsets = apriori.getFrequentItemsets();
             for (List<Integer> itemset : frequentItemsets) {
                 String output = "";
+                Collections.sort(itemset);
                 for (Integer item : itemset) {
                     output += String.valueOf(item) + " ";
                 }
