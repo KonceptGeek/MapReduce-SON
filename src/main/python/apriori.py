@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, operator
 from itertools import chain, combinations
 from collections import defaultdict
 
@@ -63,8 +63,8 @@ def generateFrequentSet(candidateSetFrequency, minSupport):
 
 
 if __name__ == '__main__':
-    dataFile = os.path.relpath('../resources/test1.txt')
-    minSupport = 10
+    dataFile = sys.argv[1]
+    minSupport = int(sys.argv[3])
     frequentItemSets = {}
     transactionList = []
     frequentSet = set()
@@ -90,10 +90,21 @@ if __name__ == '__main__':
             frequentSet = set(frequentSet.keys())
         itemGroupSize += 1
 
+    finalOutput = defaultdict(list)
+    with open(sys.argv[2], 'w') as outFile:
+        for key, value in frequentItemSets.iteritems():
+            for k, v in value.iteritems():
+                finalOutput[v].append(' '.join(k))
 
-    for key, value in frequentItemSets.iteritems():
-        for k, v in value.iteritems():
-            print k
+
+        sortedOp = sorted(finalOutput.items(), key=operator.itemgetter(0), reverse=True)
+        for i in sortedOp:
+            for item in sorted(i[1]):
+                print item + '\t(' + str(i[0]) + ')'
+                outFile.write(item + '\t(' + str(i[0]) + ')\n')
+
+        #print ' '.join(k) + '\t' + str(v)
+        #
 
 
 

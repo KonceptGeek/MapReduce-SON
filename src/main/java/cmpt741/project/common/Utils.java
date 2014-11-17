@@ -63,6 +63,18 @@ public class Utils {
         return lineCount;
     }
 
+
+    public static int getNumLinesInFile(String filePath) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(filePath)));
+        String line;
+        int lineCount = 0;
+        while((line = bufferedReader.readLine()) != null) {
+            lineCount++;
+        }
+        return lineCount;
+    }
+
+
     public static ItemSet getItemset(String line) {
         String[] lineSplit = line.split("\\s+");
         List<Item> items = new ArrayList<>();
