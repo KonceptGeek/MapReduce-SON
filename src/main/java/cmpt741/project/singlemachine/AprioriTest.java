@@ -24,13 +24,10 @@ public class AprioriTest {
 
         Apriori test1 = new Apriori("test1", db, 3);
         Apriori.debugger = false;
-        test1.start();
-        try {
-            test1.join();
+        test1.run();
+
             test1.printPatterns();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     private static String readDataFromFile(String fileName) throws IOException {

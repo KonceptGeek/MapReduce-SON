@@ -33,6 +33,7 @@ public class Executor {
         int numSplits = Integer.parseInt(args[1]);
         float supportPercentage = Float.parseFloat(args[2]);
         String outputPath = args[3];
+        String resultPath = args[4];
 
         String splitsLocation = outputPath+"_splits/";
         String pass1TempPath = outputPath+"_temp";
@@ -46,7 +47,7 @@ public class Executor {
         if (pass1Completion) {
             setupAndStartPass2(splitsLocation, pass1TempPath, outputPath, minSupport);
         }
-        printResults(outputPath);
+        printResults(outputPath, resultPath);
     }
 
     private static boolean setupAndStartPass1(String inputPath, String outputPath,
@@ -145,7 +146,7 @@ public class Executor {
         return totalLineCount;
     }
 
-    private static void printResults(String outputPath) throws Exception{
+    private static void printResults(String outputPath, String resultPath) throws Exception{
         Map<String, Integer> unsortedMap = new HashMap<>();
         ValueComparator valueComparator = new ValueComparator(unsortedMap);
         Map<String, Integer> sortedMap = new TreeMap<>(valueComparator);
@@ -175,8 +176,8 @@ public class Executor {
         System.out.println("\n\n\n##################### RESULTS #####################\n\n\n");
 
         System.out.println(unsortedMap.size());
-        BufferedWriter opWriter = new BufferedWriter(new FileWriter(new File("./output/result.txt")));
-
+        BufferedWriter opWriter = new BufferedWriter(new FileWriter(new File(resultPath)));
+        opWriter.write(String.valueOf(unsortedMap.size()) + "\n");
         for (Map.Entry<String, Integer> entrySet : sortedMap.entrySet()) {
             System.out.println(entrySet.getKey() + "\t(" + String.valueOf(entrySet.getValue()) + ")");
             opWriter.write(entrySet.getKey() + "\t(" + String.valueOf(entrySet.getValue()) + ")\n");

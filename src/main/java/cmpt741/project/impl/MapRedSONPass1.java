@@ -26,31 +26,6 @@ public class MapRedSONPass1 {
     public static class Pass1Map extends Mapper<LongWritable, Text,
             Text, IntWritable> {
 
-        /*@Override
-        public void setup(Context context) throws IOException, InterruptedException {
-            String splitRegex = context.getConfiguration().get(ITEM_SPLIT.toString());
-            int totalTransactions = context.getConfiguration().getInt(TOTAL_TRANSACTIONS.toString(), 0);
-            if (totalTransactions == 0) {
-                System.exit(1);
-            }
-            System.out.println("Total Transactions - " + String.valueOf(totalTransactions));
-
-            if (splitRegex == null) {
-                splitRegex = "\\s+";
-                System.err.println("Split regex not found");
-            }
-
-            Path path = ((FileSplit) context.getInputSplit()).getPath();
-            FileSystem fileSystem = FileSystem.get(context.getConfiguration());
-            System.out.println("Filepath: " + path.toString());
-            if (fileSystem == null) {
-                System.out.println("Filesystem is null");
-            }
-
-            List<Transaction> transactions = Utils.readTransactionsFromHadoop(path, splitRegex, fileSystem);
-            System.out.println("Number of transactions: " + String.valueOf(transactions.size()));
-        }*/
-
         public void map(LongWritable key, Text value,
                         Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
@@ -73,13 +48,8 @@ public class MapRedSONPass1 {
             //System.out.println("\nStarting Apriori");
             Apriori apriori = new Apriori("Map1-Apriori", db, supportForMap);
             Apriori.debugger = false;
-            apriori.start();
-            try {
-                apriori.join();
-                //apriori.printPatterns();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            apriori.run();
+
             List<List<Integer>> frequentItemsets = apriori.getFrequentItemsets();
             for (List<Integer> itemset : frequentItemsets) {
                 String output = "";

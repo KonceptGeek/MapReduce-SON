@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Apriori extends Thread {
+public class Apriori {
     public static boolean debugger = false;
 
     private final Database db;
@@ -16,14 +16,14 @@ public class Apriori extends Thread {
     private double minsup;
 
     public Apriori(String thrName, Database db, double minsup) {
-        super(thrName);
+
         this.db = db;
         itemset = db.getItemset();
         frequent = new ArrayList< List< Integer > >();
         this.minsup = minsup;
     }
 
-    @Override
+
     public void run() {
         double startTime = System.currentTimeMillis();
 
