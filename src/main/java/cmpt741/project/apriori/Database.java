@@ -31,13 +31,13 @@ public class Database {
         transactions = new ArrayList< List< Integer > >();
         items = new ArrayList< Integer >();
 
-        String[] lines = data.split("\\n");
+        String[] lines = data.split("\n");
 
         double startTime = System.currentTimeMillis();
 
         for (String line : lines) {
             List< Integer > transaction = new ArrayList< Integer >();
-            String[] temp = line.split("\\s+");
+            String[] temp = line.trim().split(" ");
 
             for(String num : temp) {
                 transaction.add(Integer.parseInt(num));

@@ -15,7 +15,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.*;
@@ -67,7 +66,6 @@ public class Executor {
         pass1Job.getConfiguration().setInt(MINIMUM_SUPPORT.toString(), minSupport);
         pass1Job.getConfiguration().set(ITEM_SPLIT.toString(), "\\s+");
 
-        //
         pass1Job.getConfiguration().setInt(TOTAL_TRANSACTIONS.toString(), 100000);
 
         pass1Job.getConfiguration().setLong("mapreduce.task.timeout", 1000000);
@@ -192,7 +190,6 @@ public class Executor {
             this.base = base;
         }
 
-        // Note: this comparator imposes orderings that are inconsistent with equals.
         public int compare(String a, String b) {
             if (base.get(a) > base.get(b)) {
                 return -1;

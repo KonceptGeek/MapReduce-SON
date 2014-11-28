@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
@@ -36,7 +35,6 @@ public class MapRedSONPass2 {
         protected void setup(Context context) throws IOException, InterruptedException {
             super.setup(context);
             //Read the data of the reduce step of pass1
-            //System.out.println("In SETUP");
             String pass1OpPath = context.getConfiguration().get(PASS1_OP.toString());
             RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator =
                     FileSystem.get(context.getConfiguration()).listFiles(new Path(pass1OpPath), true);
@@ -47,8 +45,6 @@ public class MapRedSONPass2 {
                     readFromFile(path, context);
                 }
             }
-            //System.out.println("SETUP DONE");
-            //System.out.println(itemsets.size());
         }
 
         public void map(LongWritable key, Text value,
@@ -56,11 +52,7 @@ public class MapRedSONPass2 {
             // For each line in the subset
             // create all possible subsetts and check if the subset
             // is present in the data read in setup and update the counts
-            //System.out.println("Pass2Map");
-            //System.out.println(((FileSplit) context.getInputSplit()).getPath().toString());
             String[] lines = value.toString().split("\\n");
-            //int maxK = 0;
-            //String maxLine = "";
             for (String line : lines) {
                 List<Integer> lineSplit = Utils.getIntegerArray(line);
                 ICombinatoricsVector<Integer> initialSet = Factory.createVector(lineSplit);
@@ -84,18 +76,16 @@ public class MapRedSONPass2 {
                     }
                 }
             }
-            //System.out.println("MaxK - " + String.valueOf(maxK));
-            //System.out.println("Line - " + maxLine);
 
             for (Map.Entry<List<Integer>, Integer> entrySet : itemsets.entrySet()) {
-                //System.out.println("WRITING: " + entrySet.getKey().toString() + " | LOCAL SUPPORT: " + entrySet.getValue().intValue());
                 context.write(new Text(Utils.intArrayToString(entrySet.getKey())), new IntWritable(entrySet.getValue().intValue()));
             }
         }
 
         private static void readFromFile(String path, Context context) throws IOException {
             BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(FileSystem.get(context.getConfiguration()).open(new Path(path))));
+                    new InputStreamReader(
+                            FileSystem.get(context.getConfiguration()).open(new Path(path))));
 
             String line = null;
             while((line = bufferedReader.readLine()) != null) {
@@ -115,17 +105,13 @@ public class MapRedSONPass2 {
 
         public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int minSupport = context.getConfiguration().getInt(MINIMUM_SUPPORT.toString(), 0);
-            //System.out.println("MINIMUM SUPPORT: " + String.valueOf(minSupport));
             int support = 0;
             for (IntWritable value : values) {
                 support += value.get();
             }
             if (support >= minSupport) {
-                //System.out.println("WRITING - " + key.toString() + "; Support - " + String.valueOf(support));
                 context.write(key, new IntWritable(support));
-            } /*else {
-                System.out.println("LEAVING - " + key.toString() + "; Support - " + String.valueOf(support));
-            }*/
+            }
         }
     }
 }

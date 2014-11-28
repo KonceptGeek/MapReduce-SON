@@ -103,8 +103,6 @@ if __name__ == '__main__':
                 print item + '\t(' + str(i[0]) + ')'
                 outFile.write(item + '\t(' + str(i[0]) + ')\n')
 
-        #print ' '.join(k) + '\t' + str(v)
-        #
 
 
 

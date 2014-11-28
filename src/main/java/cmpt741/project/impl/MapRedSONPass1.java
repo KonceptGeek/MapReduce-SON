@@ -14,7 +14,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -29,7 +28,6 @@ public class MapRedSONPass1 {
         public void map(LongWritable key, Text value,
                         Context context) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
-            //int numMappers = Integer.parseInt(conf.get("mapred.map.tasks"));
             int minSupport = conf.getInt(MINIMUM_SUPPORT.toString(), 0);
             int totalTransactions = conf.getInt(TOTAL_TRANSACTIONS.toString(), 0);
 
@@ -42,13 +40,15 @@ public class MapRedSONPass1 {
 
             int supportForMap = (int) Math.floor((((double) numTransactions)/((double) totalTransactions)) * minSupport);
 
-            //System.out.println("\nSupport for map: " + String.valueOf(supportForMap));
-            //System.out.println("\nTransactions being processed by map: " + String.valueOf(numTransactions));
-
-            //System.out.println("\nStarting Apriori");
             Apriori apriori = new Apriori("Map1-Apriori", db, supportForMap);
             Apriori.debugger = false;
-            apriori.run();
+
+            apriori.start();
+            try {
+                apriori.join();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
 
             List<List<Integer>> frequentItemsets = apriori.getFrequentItemsets();
             for (List<Integer> itemset : frequentItemsets) {
